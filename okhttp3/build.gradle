@@ -44,6 +44,9 @@ afterEvaluate {
             // Creates a Maven publication called "release".
             release(MavenPublication) {
                 from components.release
+                groupId = 'com.peanut.sdk'
+                artifactId = 'okhttp3'
+                version = '1.0.1'
             }
         }
     }
