@@ -18,7 +18,7 @@ import kotlin.concurrent.thread
  * 1.使用内存缓存
  * 2.保存时使用使用Room异步刷回磁盘持久化
  */
-class CacheStoreCookieJar(context: Context) : CookieJar {
+class CacheStoreCookieJar(context: Context, val callback: OnReceiveCookieCallback? = null) : CookieJar {
     private var database: CookieDatabase
     private var cookies: HashMap<String, ConcurrentHashMap<String, Cookie>>
 
@@ -31,6 +31,7 @@ class CacheStoreCookieJar(context: Context) : CookieJar {
             }
             results.forEach {
                 val cookie = it.toCookie()
+                handleCallback(cookie)
                 if (cookies.containsKey(it.hostKey)) {
                     cookies[it.hostKey]?.set(cookie.key(), cookie)
                 } else {
@@ -52,7 +53,16 @@ class CacheStoreCookieJar(context: Context) : CookieJar {
         }
     }
 
+    private fun handleCallback(cookie: Cookie){
+        try {
+            callback?.onReceive(cookie)
+        }catch (e:Exception){
+            e.printStackTrace()
+        }
+    }
+
     private fun saveFromResponse(url: HttpUrl, cookie: Cookie) {
+        handleCallback(cookie)
         if (!cookie.persistent) {
             return
         }

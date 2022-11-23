@@ -1,13 +1,14 @@
 package com.peanut.sdk.okhttp3
 
 import android.content.Context
+import okhttp3.Cookie
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
 
-class CookieJarTest(context: Context) {
+class CookieJarTest(context: Context):OnReceiveCookieCallback {
     private var okHttpClient: OkHttpClient? = null
-    private val cookieJar = CacheStoreCookieJar(context)
+    private val cookieJar = CacheStoreCookieJar(context, this)
 
     private fun getHttpClient(): OkHttpClient {
         if (okHttpClient == null) {
@@ -34,5 +35,9 @@ class CookieJarTest(context: Context) {
             .build()
         r = client.newCall(request).execute()
         println(r.headers.toString())
+    }
+
+    override fun onReceive(cookie: Cookie) {
+        println(cookie)
     }
 }
