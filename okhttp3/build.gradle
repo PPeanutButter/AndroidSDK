@@ -1,6 +1,6 @@
 plugins {
     id 'maven-publish'
-    id 'com.android.application'
+    id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-kapt'
 }
@@ -44,10 +44,10 @@ afterEvaluate {
             // Creates a Maven publication called "release".
             // see https://developer.android.com/reference/tools/gradle-api/7.1/com/android/build/api/dsl/LibraryPublishing
             release(MavenPublication) {
-                from components.release
                 groupId = 'com.github.PPeanutButter'
                 artifactId = 'okhttp3'
                 version = '1.0.1'
+                from components.release
             }
         }
     }
