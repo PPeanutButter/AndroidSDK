@@ -43,7 +43,7 @@ afterEvaluate {
             // see https://developer.android.com/reference/tools/gradle-api/7.1/com/android/build/api/dsl/LibraryPublishing
             release(MavenPublication) {
                 from components.release
-                groupId = 'com.peanut.sdk'
+                groupId = 'com.github.PPeanutButter'
                 artifactId = 'petlin'
                 version = '1.0.0'
             }
