@@ -14,4 +14,21 @@ object Extend{
             else -> String.format("%.2f ", this / 1.0) + "${separator}B"
         }
     }
+
+    /**
+     * 将整型秒数描述为持续时间, 最大支持显示小时。
+     * @param hour 小时单位描述，默认为 _小时_
+     * @param minute 分钟单位描述，默认为 _分_
+     * @param seconds 秒单位描述，默认为 _秒
+     */
+    fun Int.describeAsTimeLasts(hour: String = " 小时 ", minute: String = " 分 ", seconds: String = " 秒"): String {
+        val hh = this / 3600
+        val mm = this % 3600 / 60
+        val ss = this % 3600 % 60
+        return when {
+            hh > 0 -> "$hh$hour${"0".repeat(if (mm < 10) 1 else 0)}$mm$minute${"0".repeat(if (ss < 10) 1 else 0)}$ss$seconds"
+            mm > 0 -> "$mm$minute${"0".repeat(if (ss < 10) 1 else 0)}$ss$seconds"
+            else -> "$ss$seconds"
+        }
+    }
 }
