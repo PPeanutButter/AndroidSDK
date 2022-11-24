@@ -9,7 +9,6 @@ android {
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.peanut.sdk.petlin"
         minSdk 16
         targetSdk 33
         versionCode 1
