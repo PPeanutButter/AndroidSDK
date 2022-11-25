@@ -18,3 +18,4 @@ rootProject.name = "SDK"
 include ':app'
 include ':okhttp3'
 include ':petlin'
+include ':datastore'
