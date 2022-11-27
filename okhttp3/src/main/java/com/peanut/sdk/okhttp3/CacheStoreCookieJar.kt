@@ -1,12 +1,10 @@
 package com.peanut.sdk.okhttp3
 
 import android.content.Context
+import android.util.Log
 import androidx.room.Room
 import com.peanut.sdk.okhttp3.CookieEntity.Companion.key
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import okhttp3.Cookie
 import okhttp3.CookieJar
 import okhttp3.HttpUrl
@@ -18,25 +16,35 @@ import kotlin.concurrent.thread
  * 1.使用内存缓存
  * 2.保存时使用使用Room异步刷回磁盘持久化
  */
-class CacheStoreCookieJar(context: Context, val callback: OnReceiveCookieCallback? = null) : CookieJar {
+class CacheStoreCookieJar(context: Context, private val callback: OnReceiveCookieCallback? = null, private val debug: Boolean = false) : CookieJar {
     private var database: CookieDatabase
     private var cookies: HashMap<String, ConcurrentHashMap<String, Cookie>>
+
+    companion object{
+        const val TAG = "CacheStoreCookieJar"
+    }
 
     init {
         database = Room.databaseBuilder(context, CookieDatabase::class.java, "cookies").build()
         cookies = HashMap()
-        MainScope().launch {
-            val results = withContext(Dispatchers.IO) {
-                database.cookieDao().getAll()
-            }
+        //必须是同步加载，不然前几次请求可能没有cookie数据，
+        runBlocking {
+            val results = database.cookieDao().getAll()
             results.forEach {
                 val cookie = it.toCookie()
                 handleCallback(cookie)
                 if (cookies.containsKey(it.hostKey)) {
                     cookies[it.hostKey]?.set(cookie.key(), cookie)
                 } else {
-                    cookies[it.hostKey] = ConcurrentHashMap<String, Cookie>().apply { this[cookie.name + cookie.domain] = cookie }
+                    cookies[it.hostKey] = ConcurrentHashMap<String, Cookie>().apply { this[cookie.key()] = cookie }
                 }
+            }
+            if (debug){
+                Log.d(TAG, "load cookie from disk start")
+                for (host in cookies.keys){
+                    Log.d(TAG, "$host ==> ${cookies[host]?.values?.toTypedArray().contentDeepToString()}")
+                }
+                Log.d(TAG, "load cookie from disk finish")
             }
         }
     }
@@ -48,8 +56,15 @@ class CacheStoreCookieJar(context: Context, val callback: OnReceiveCookieCallbac
             }
             this.saveFromResponse(url, cookie)
         }
-        thread {
-            database.cookieDao().insertAll(*(cookies.map { CookieEntity.fromCookie(it, url) }.toTypedArray()))
+        MainScope().launch {
+            withContext(Dispatchers.IO){
+                database.cookieDao().insertAll(*(cookies.map { CookieEntity.fromCookie(it, url) }.toTypedArray()))
+            }
+        }
+        if (debug){
+            Log.d(TAG, "receive cookie from response start")
+            Log.d(TAG, "${url.key()} ==> ${cookies.toTypedArray().contentDeepToString()}")
+            Log.d(TAG, "receive cookie from response finnish")
         }
     }
 
@@ -86,6 +101,11 @@ class CacheStoreCookieJar(context: Context, val callback: OnReceiveCookieCallbac
                     result.add(cookie)
                 }
             }
+        }
+        if (debug){
+            Log.d(TAG, "load cookie from request start")
+            Log.d(TAG, "${url.key()} ==> ${result.toTypedArray().contentDeepToString()}")
+            Log.d(TAG, "load cookie from request finnish")
         }
         return result
     }
