@@ -33,11 +33,10 @@ android {
 }
 
 dependencies {
-//    implementation 'com.android.support:multidex:1.0.3'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel:2.5.1'
     implementation project(path: ':petlin')
     implementation project(path: ':okhttp3')
     implementation project(path: ':datastore')
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel:2.5.1'
 }
