@@ -13,9 +13,9 @@
 
 ```kotlin
 val client = OkHttpClient
-				.Builder()
-				.cookieJar(CacheStoreCookieJar(context))
-				.build()
+			.Builder()
+			.cookieJar(CacheStoreCookieJar(context))
+			.build()
 ```
 
 ## 带回调
