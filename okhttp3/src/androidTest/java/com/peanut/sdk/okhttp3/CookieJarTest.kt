@@ -6,9 +6,11 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 
 
-class CookieJarTest(context: Context):OnReceiveCookieCallback {
+class CookieJarTest(context: Context) {
     private var okHttpClient: OkHttpClient? = null
-    private val cookieJar = CacheStoreCookieJar(context, this)
+    private val cookieJar = CacheStoreCookieJar(context = context, debug = true){
+        println(it.toString())
+    }
 
     private fun getHttpClient(): OkHttpClient {
         if (okHttpClient == null) {
@@ -35,9 +37,5 @@ class CookieJarTest(context: Context):OnReceiveCookieCallback {
             .build()
         r = client.newCall(request).execute()
         println(r.headers.toString())
-    }
-
-    override fun onReceive(cookie: Cookie) {
-        println(cookie)
     }
 }

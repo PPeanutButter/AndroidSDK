@@ -13,10 +13,20 @@ import kotlin.concurrent.thread
 
 
 /**
- * 1.使用内存缓存
- * 2.保存时使用使用Room异步刷回磁盘持久化
+ * # CacheStoreCookieJar
+ * 以自动化的方式管理OkhttpClient的Cookie
+ *
+ *
+ * 🎉Features
+ * - 内存缓存(HashMap)
+ * - 磁盘存储(Jetpack Room Database)
+ *
+ * @param context Context
+ * @param debug 打开一些日志
+ * @param callback 收到cookie时的回调
  */
-class CacheStoreCookieJar(context: Context, private val callback: OnReceiveCookieCallback? = null, private val debug: Boolean = false) : CookieJar {
+class CacheStoreCookieJar(context: Context, private val debug: Boolean = false,
+                          private val callback: OnReceiveCookieCallback? = null) : CookieJar {
     private var database: CookieDatabase
     private var cookies: HashMap<String, ConcurrentHashMap<String, Cookie>>
 
@@ -70,7 +80,7 @@ class CacheStoreCookieJar(context: Context, private val callback: OnReceiveCooki
 
     private fun handleCallback(cookie: Cookie){
         try {
-            callback?.onReceive(cookie)
+            callback?.invoke(cookie)
         }catch (e:Exception){
             e.printStackTrace()
         }
