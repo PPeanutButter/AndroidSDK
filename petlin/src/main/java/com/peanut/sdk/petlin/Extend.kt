@@ -82,6 +82,7 @@ object Extend{
 
     /**
      * 使用Base 64编码文本
+     * @param flags [Base64](android.util.Base64)内的一些flags
      */
     fun String.encodeBase64(vararg flags: Int): String {
         var flag = 0

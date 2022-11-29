@@ -52,10 +52,10 @@ afterEvaluate {
 
 dependencies {
     //datastore
-    implementation "androidx.datastore:datastore-preferences:1.0.0"
+    api "androidx.datastore:datastore-preferences:1.0.0"
     //Preference
-    implementation "androidx.preference:preference:1.2.0"
-    implementation "androidx.preference:preference-ktx:1.2.0"
+    api "androidx.preference:preference:1.2.0"
+    api "androidx.preference:preference-ktx:1.2.0"
     implementation 'androidx.core:core-ktx:1.9.0'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.4'
