@@ -25,18 +25,19 @@ import kotlin.concurrent.thread
  * @param debug 打开一些日志
  * @param callback 收到cookie时的回调
  */
-class CacheStoreCookieJar(context: Context, private val debug: Boolean = false,
+class CacheStoreCookieJar(context: Context,
+                          private val debug: Boolean = false,
+                          private val deleteExpiredCookie: Boolean = true,
                           private val callback: OnReceiveCookieCallback? = null) : CookieJar {
-    private var database: CookieDatabase
-    private var cookies: HashMap<String, ConcurrentHashMap<String, Cookie>>
+    private var database: CookieDatabase =
+        Room.databaseBuilder(context, CookieDatabase::class.java, "cookies").build()
+    private var cookies: HashMap<String, ConcurrentHashMap<String, Cookie>> = HashMap()
 
     companion object{
         const val TAG = "CacheStoreCookieJar"
     }
 
     init {
-        database = Room.databaseBuilder(context, CookieDatabase::class.java, "cookies").build()
-        cookies = HashMap()
         //必须是同步加载，不然前几次请求可能没有cookie数据，
         runBlocking {
             val results = database.cookieDao().getAll()
@@ -61,7 +62,7 @@ class CacheStoreCookieJar(context: Context, private val debug: Boolean = false,
 
     override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {
         for (cookie in cookies) {
-            if (isCookieExpired(cookie)) {
+            if (cookie.expired()) {
                 continue
             }
             this.saveFromResponse(url, cookie)
@@ -105,7 +106,7 @@ class CacheStoreCookieJar(context: Context, private val debug: Boolean = false,
         if (cookies.containsKey(hostKey)) {
             val cookies: Collection<Cookie> = cookies[hostKey]!!.values
             for (cookie in cookies) {
-                if (isCookieExpired(cookie)) {
+                if (cookie.expired() && deleteExpiredCookie) {
                     this.remove(hostKey, cookie)
                 } else {
                     result.add(cookie)
@@ -130,7 +131,8 @@ class CacheStoreCookieJar(context: Context, private val debug: Boolean = false,
         }
     }
 
-    private fun isCookieExpired(cookie: Cookie): Boolean {
-        return cookie.expiresAt < System.currentTimeMillis()
+    fun Cookie.expired(before: Long = 0): Boolean{
+        return this.expiresAt - before < System.currentTimeMillis()
     }
+
 }
